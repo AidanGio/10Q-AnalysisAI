@@ -1,53 +1,52 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import axios from 'axios'
+import React, { useState } from "react";
+import axios from "axios";
 
 const App = () => {
-    const [pdfFile, setPdfFile] = useState(null);
+    const [selectedFile, setSelectedFile] = useState(null);
     const [summary, setSummary] = useState("");
-    const [questionButtons, setQuestionButtons] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [questions, setQuestions] = useState([]);
+    const [selectedQuestion, setSelectedQuestion] = useState("");
+    const [chatbotResponse, setChatbotResponse] = useState("");
 
     const handleFileChange = (e) => {
-        setPdfFile(e.target.files[0]);
+        setSelectedFile(e.target.files[0]);
+        console.log("Selected file:", e.target.files[0]);
     };
 
-    const handleSubmit = async () => {
-        if (!pdfFile) return;
+    const handleReportSubmit = async (e) => {
+        e.preventDefault();
+        if (!selectedFile) return;
 
-        setLoading(true);
         const formData = new FormData();
-        formData.append("pdf", pdfFile);
-
+        formData.append("report", selectedFile);
         try {
-            const response = await axios.post("/api/analyze", formData);
+            const response = await axios.post("http://localhost:3000/claude/analyze", formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
             setSummary(response.data.summary);
-            setQuestionButtons(response.data.questionButtons);
+            setQuestions(response.data.questions);
         } catch (error) {
             console.error("Error:", error);
         }
-        setLoading(false);
     };
 
     const handleQuestionClick = async (question) => {
-        setLoading(true);
+        setSelectedQuestion(question);
         try {
-            const response = await axios.post("/api/question", { question });
-            console.log(response.data);
+            const response = await axios.post("/api/answer", { question });
+            setChatbotResponse(response.data.answer);
         } catch (error) {
             console.error("Error:", error);
         }
-        setLoading(false);
     };
 
     return (
         <div>
-            <h1>10-Q Financial Report Analysis</h1>
-            <input type="file" accept=".pdf" onChange={handleFileChange} />
-            <button onClick={handleSubmit} disabled={loading}>
-                {loading ? "Analyzing..." : "Analyze"}
-            </button>
+            <h1>10-Q Analysis Chatbot</h1>
+            <form onSubmit={handleReportSubmit}>
+                <input type="file" accept=".pdf" onChange={handleFileChange} />
+                <button type="submit">Analyze</button>
+            </form>
 
             {summary && (
                 <div>
@@ -56,14 +55,21 @@ const App = () => {
                 </div>
             )}
 
-            {questionButtons.length > 0 && (
+            {questions.length > 0 && (
                 <div>
                     <h2>Questions</h2>
-                    {questionButtons.map((question, index) => (
-                        <button key={index} onClick={() => handleQuestionClick(question)} disabled={loading}>
+                    {questions.map((question, index) => (
+                        <button key={index} onClick={() => handleQuestionClick(question)}>
                             {question}
                         </button>
                     ))}
+                </div>
+            )}
+
+            {chatbotResponse && (
+                <div>
+                    <h2>Chatbot Response</h2>
+                    <p>{chatbotResponse}</p>
                 </div>
             )}
         </div>
