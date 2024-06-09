@@ -3,10 +3,9 @@ import axios from "axios";
 
 const App = () => {
     const [selectedFile, setSelectedFile] = useState(null);
-    const [summary, setSummary] = useState("");
-    const [questions, setQuestions] = useState([]);
     const [selectedQuestion, setSelectedQuestion] = useState("");
     const [chatbotResponse, setChatbotResponse] = useState("");
+    const [analysis, setAnalysis] = useState(null);
 
     const handleFileChange = (e) => {
         setSelectedFile(e.target.files[0]);
@@ -23,8 +22,7 @@ const App = () => {
             const response = await axios.post("http://localhost:3000/claude/analyze", formData, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
-            setSummary(response.data.summary);
-            setQuestions(response.data.questions);
+            setAnalysis(response.data.analysis);
         } catch (error) {
             console.error("Error:", error);
         }
@@ -48,28 +46,18 @@ const App = () => {
                 <button type="submit">Analyze</button>
             </form>
 
-            {summary && (
+            {analysis && (
                 <div>
                     <h2>Summary</h2>
-                    <p>{summary}</p>
-                </div>
-            )}
+                    <p>{analysis.summary}</p>
 
-            {questions.length > 0 && (
-                <div>
                     <h2>Questions</h2>
-                    {questions.map((question, index) => (
-                        <button key={index} onClick={() => handleQuestionClick(question)}>
-                            {question}
-                        </button>
-                    ))}
-                </div>
-            )}
-
-            {chatbotResponse && (
-                <div>
-                    <h2>Chatbot Response</h2>
-                    <p>{chatbotResponse}</p>
+                    <ul>
+                        {analysis.questions.map((questionObj, index) => {
+                            const questionKey = `question${index + 1}`;
+                            return <li key={questionKey}>{questionObj[questionKey]}</li>;
+                        })}
+                    </ul>
                 </div>
             )}
         </div>
