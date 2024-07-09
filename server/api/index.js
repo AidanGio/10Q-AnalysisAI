@@ -1,10 +1,8 @@
 import express from "express";
-import configRoutes from "./routes/index.js";
-
+import configRoutes from "../routes/index.js";
 import dotenv from "dotenv";
 import cors from "cors";
-
-import { handleCrash, handleRejection } from "./services/crashHandler.js";
+import { handleCrash, handleRejection } from "../services/crashHandler.js";
 
 dotenv.config();
 
@@ -17,6 +15,5 @@ process.on("uncaughtException", handleCrash);
 process.on("unhandledRejection", handleRejection);
 
 configRoutes(app);
-app.listen(3000, async () => {
-    console.log("We now have a server!");
-});
+
+export default app;
