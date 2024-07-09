@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 import axios from "axios";
 
+
+
+const apiUrl = import.meta.env.REACT_APP_API_URL || "http://localhost:3000";
+
 const App = () => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [analysis, setAnalysis] = useState(null);
@@ -20,7 +24,7 @@ const App = () => {
         const formData = new FormData();
         formData.append("report", selectedFile);
         try {
-            const response = await axios.post("http://localhost:3000/claude/analyze", formData, {
+            const response = await axios.post(`${apiUrl}/claude/analyze`, formData, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
             setAnalysis(response.data.analysis);
