@@ -1,7 +1,6 @@
 import express from "express";
 import Anthropic from "@anthropic-ai/sdk";
 import multer from "multer";
-import fs from "fs";
 import pdfParse from 'pdf-parse/lib/pdf-parse.js';
 import jsonParse from "json-parse-even-better-errors";
 
@@ -18,7 +17,7 @@ router.post("/analyze", upload.single("report"), async (req, res) => {
 
     try {
         const reportFile = req.file;
-        const pdfBuffer = fs.readFileSync(reportFile.path);
+        const pdfBuffer = req.file.buffer;
 
         const data = await pdfParse(pdfBuffer);
         const reportContent = data.text;
@@ -71,7 +70,6 @@ router.post("/analyze", upload.single("report"), async (req, res) => {
 
         console.log(analysis);
 
-        fs.unlinkSync(reportFile.path);
 
         res.json({ analysis });
     } catch (error) {
