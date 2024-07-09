@@ -37,18 +37,22 @@ router.post("/analyze", upload.single("report"), async (req, res) => {
                     role: "user",
                     content: `Analyze the provided 10-Q report and return the response in the following JSON format:
             {
-                "summary": "An extensive summary of the key points from the report, including financial results, segment performance, outlook, and liquidity.",
+                "summary": "An extensive summary of the key points from the report, including financial results, segment performance, outlook, and liquidity."
+                ,
                 "questions": [
                     {
                         "question1": "A relevant question to provide additional details on the report"
-                        answer1: "An extensive answer to the question"
+                        ,
+                        "answer1": "An extensive answer to the question"
                     },
                     {
                         "question2": "Another relevant question to provide additional details on the report"
+                        ,
                         "answer2": "An extensive answer to the question"
                     },
                     {
                         "question3": "Another relevant question to provide additional details on the report"
+                        ,
                         "answer3": "An extensive answer to the question"
                     },
                     ... (5 to 10 questions)
@@ -64,6 +68,7 @@ router.post("/analyze", upload.single("report"), async (req, res) => {
         const analysisText = response.content[0].text;
         const usage = response.usage;
         console.log(usage);
+        console.log(analysisText);
 
         const startIndex = analysisText.indexOf("{");
         const endIndex = analysisText.lastIndexOf("}") + 1;
