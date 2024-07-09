@@ -6,7 +6,12 @@ import pdfParse from 'pdf-parse/lib/pdf-parse.js';
 import jsonParse from "json-parse-even-better-errors";
 
 const router = express.Router();
-const upload = multer({ dest: "uploads/" });
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+        fileSize: 5 * 1024 * 1024, // 5MB
+    },
+});
 router.post("/analyze", upload.single("report"), async (req, res) => {
     // console.log(process.env.ANTHROPIC_API_KEY);
     const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
