@@ -1,8 +1,9 @@
 import express from "express";
 import Anthropic from "@anthropic-ai/sdk";
 import multer from "multer";
-import pdfParse from 'pdf-parse/lib/pdf-parse.js';
+import pdfParse from "pdf-parse/lib/pdf-parse.js";
 import jsonParse from "json-parse-even-better-errors";
+import axios from "axios";
 
 const router = express.Router();
 const upload = multer({
@@ -16,8 +17,15 @@ router.post("/analyze", upload.single("report"), async (req, res) => {
     const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
     try {
-        const reportFile = req.file;
-        const pdfBuffer = req.file.buffer;
+        let pdfBuffer;
+        if (req.file) {
+            pdfBuffer = req.file.buffer;
+        } else if (req.body.pdfUrl) {
+            const response = await axios.get(req.body.pdfUrl, { responseType: "arraybuffer" });
+            pdfBuffer = Buffer.from(response.data);
+        } else {
+            throw new Error("No file or URL provided");
+        }
 
         const data = await pdfParse(pdfBuffer);
         const reportContent = data.text;
@@ -69,7 +77,6 @@ router.post("/analyze", upload.single("report"), async (req, res) => {
         const analysis = jsonParse(jsonString);
 
         console.log(analysis);
-
 
         res.json({ analysis });
     } catch (error) {

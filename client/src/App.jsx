@@ -1,28 +1,38 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-
-
 const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
-
+// const apiUrl = "http://localhost:3000";
 const App = () => {
     const [selectedFile, setSelectedFile] = useState(null);
+    const [pdfUrl, setPdfUrl] = useState("");
     const [analysis, setAnalysis] = useState(null);
     const [expandedQuestion, setExpandedQuestion] = useState(null);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
 
     const handleFileChange = (e) => {
         setSelectedFile(e.target.files[0]);
+        setPdfUrl("");
+    };
+
+    const handleUrlChange = (e) => {
+        setPdfUrl(e.target.value);
+        setSelectedFile(null);
     };
 
     const handleReportSubmit = async (e) => {
         e.preventDefault();
-        if (!selectedFile) return;
+        if (!selectedFile && !pdfUrl) return;
 
         setIsAnalyzing(true);
 
         const formData = new FormData();
-        formData.append("report", selectedFile);
+        if (selectedFile) {
+            formData.append("report", selectedFile);
+        } else {
+            formData.append("pdfUrl", pdfUrl);
+        }
+
         try {
             const response = await axios.post(`${apiUrl}/claude/analyze`, formData, {
                 headers: { "Content-Type": "multipart/form-data" },
@@ -31,6 +41,7 @@ const App = () => {
             setIsAnalyzing(false);
         } catch (error) {
             console.error("Error:", error);
+            setIsAnalyzing(false);
         }
     };
 
@@ -42,18 +53,20 @@ const App = () => {
         <div className="min-h-screen bg-gray-900 text-white p-8">
             <div className="max-w-3xl mx-auto">
                 <h1 className="text-4xl font-bold text-center text-green-400 mb-8">10-Q Analysis Tool</h1>
-                <form onSubmit={handleReportSubmit} className="mb-8">
-                    <input
-                        type="file"
-                        accept=".pdf"
-                        onChange={handleFileChange}
-                        className="mb-4 block w-full text-sm text-gray-400 
-                            file:mr-4 file:py-2 file:px-4
-                            file:rounded-full file:border-0
-                            file:text-sm file:font-semibold
-                            file:bg-gray-800 file:text-green-400
-                            hover:file:bg-gray-700"
-                    />
+                <form onSubmit={handleReportSubmit} className="mb-8 space-y-4">
+                    <div className="relative">
+                        <input type="file" accept=".pdf" onChange={handleFileChange} className="opacity-0 absolute inset-0 w-full h-full cursor-pointer" />
+                        <div className="bg-gray-800 text-gray-300 border border-gray-700 rounded p-2 text-sm">{selectedFile ? selectedFile.name : "Choose File"}</div>
+                    </div>
+                    <div className="relative">
+                        <input
+                            type="url"
+                            placeholder="Or enter PDF URL"
+                            value={pdfUrl}
+                            onChange={handleUrlChange}
+                            className="w-full bg-gray-800 text-gray-300 border border-gray-700 rounded p-2 text-sm"
+                        />
+                    </div>
                     <button type="submit" className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded" disabled={isAnalyzing}>
                         {isAnalyzing ? "Analyzing..." : "Analyze Report"}
                     </button>
