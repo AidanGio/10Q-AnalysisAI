@@ -3,7 +3,7 @@ import axios from "axios";
 
 
 
-const apiUrl = import.meta.env.REACT_APP_API_URL || "http://localhost:3000";
+const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 const App = () => {
     const [selectedFile, setSelectedFile] = useState(null);
