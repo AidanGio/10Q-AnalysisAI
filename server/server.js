@@ -17,6 +17,4 @@ process.on("uncaughtException", handleCrash);
 process.on("unhandledRejection", handleRejection);
 
 configRoutes(app);
-app.listen(3000, async () => {
-    console.log("We now have a server!");
-});
+export default app;
