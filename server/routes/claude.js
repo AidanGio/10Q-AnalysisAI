@@ -2,7 +2,7 @@ import express from "express";
 import Anthropic from "@anthropic-ai/sdk";
 import multer from "multer";
 import fs from "fs";
-import pdf from "pdf-parse";
+import pdfParse from 'pdf-parse/lib/pdf-parse.js';
 import jsonParse from "json-parse-even-better-errors";
 
 const router = express.Router();
@@ -15,7 +15,7 @@ router.post("/analyze", upload.single("report"), async (req, res) => {
         const reportFile = req.file;
         const pdfBuffer = fs.readFileSync(reportFile.path);
 
-        const data = await pdf(pdfBuffer);
+        const data = await pdfParse(pdfBuffer);
         const reportContent = data.text;
         const response = await anthropic.messages.create({
             model: "claude-3-haiku-20240307",
