@@ -17,16 +17,8 @@ router.post("/analyze", upload.single("report"), async (req, res) => {
     const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
     try {
-        let pdfBuffer;
-        if (req.file) {
-            pdfBuffer = req.file.buffer;
-        } else if (req.body.pdfUrl) {
-            const response = await axios.get(req.body.pdfUrl, { responseType: "arraybuffer" });
-            pdfBuffer = Buffer.from(response.data);
-        } else {
-            throw new Error("No file or URL provided");
-        }
-
+        const reportFile = req.file;
+        const pdfBuffer = req.file.buffer;
         const data = await pdfParse(pdfBuffer);
         const reportContent = data.text;
         const response = await anthropic.messages.create({
